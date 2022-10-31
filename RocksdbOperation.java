@@ -16,12 +16,15 @@ public class RocksdbOperation {
     public static void main(String[] args) throws Exception {
 
         if (args.length < 2) {
-            System.out.println("\tPrint Usage: $1(totalWriteCnt) $2(rocksdbPath)");
+            System.out.println("\tPrint Usage: [db_path] [count]");
             System.exit(-1);
         }
 
-        Long totalCnt = Long.valueOf(args[0]);
-        String dbPath = args[1];
+        System.out.println(args[0]);
+        System.out.println(args[1]);
+
+        String dbPath = args[0];
+        Long totalCnt = Long.valueOf(args[1]);
 
         Options options = new Options();
         options.setCreateIfMissing(true);
