@@ -23,7 +23,7 @@ rocks:
 
 a='$$'
 b='@'
-c='java -server -XX:NewSize=4m -XX:+AggressiveOpts -Djava.library.path=${ROCKSDB_LIBPATH} -cp ${ROCKSDB_JAR}:${ROCKSDB_CLASSPATH}:./ RocksdbOperation '
+c='java -Xms32g -Xmx32g -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:+ScavengeBeforeFullGC -XX:+DisableExplicitGC -XX:+HeapDumpOnOutOfMemoryError -Djava.library.path=${ROCKSDB_LIBPATH} -cp ${ROCKSDB_JAR}:${ROCKSDB_CLASSPATH}:./ RocksdbOperation '
 
 rocksjni:
 	javac -server -cp "${ROCKSDB_JAR}:${ROCKSDB_CLASSPATH}":./ RocksdbOperation.java

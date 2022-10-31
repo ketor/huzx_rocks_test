@@ -13,6 +13,21 @@ public class RocksdbOperation {
         RocksDB.loadLibrary();
     }
 
+    static long get_time_us(){
+        return System.nanoTime() / 1000000;
+    }
+
+    static long print_time(String msg, long temp_time){
+        long local_temp_time = get_time_us();
+        if(temp_time == 0) {
+            temp_time = local_temp_time;
+        }
+        // System.out.println("MSG=[" + msg + "], time = [" + (local_temp_time - temp_time) + "]");
+        System.out.println(String.format("%s time=[%16d]", msg,  local_temp_time - temp_time));
+
+        return local_temp_time;
+    }
+
     public static void main(String[] args) throws Exception {
 
         if (args.length < 2) {
@@ -26,36 +41,71 @@ public class RocksdbOperation {
         String dbPath = args[0];
         Long totalCnt = Long.valueOf(args[1]);
 
+        long temp_time = get_time_us();
+
         Options options = new Options();
         options.setCreateIfMissing(true);
         options.setStatistics(new Statistics());
         options.setCompressionType(CompressionType.NO_COMPRESSION);
 
+        temp_time = print_time("OPEN RocksDB", temp_time);
+
         RocksDB rocksDB = RocksDB.open(options, dbPath);
 
-        String[] keyArray = new String[totalCnt.intValue()];
-        for (int i = 0; i < totalCnt.intValue(); i++) {
-            keyArray[i] =  String.format("key%d", i);
-        }
+        temp_time = print_time("OPEN RocksDB OK", temp_time);
 
-        long writeStartTime = System.nanoTime();
+        long temp_time2 = get_time_us();
+
+        // String[] keyArray = new String[totalCnt.intValue()];
+        // for (int i = 0; i < totalCnt.intValue(); i++) {
+        //     keyArray[i] =  String.format("key%d", i);
+
+        //     if (i % 100000 == 0) {
+        //         temp_time2 = print_time(String.format("MALLOC[%16d]", i), temp_time2);
+        //     }
+        // }
+        // temp_time = print_time("MALLOC TIME", temp_time);
+
+        byte[][] keyArray = new byte[totalCnt.intValue()][];
         for (int i = 0; i < totalCnt.intValue(); i++) {
-            byte[] keyValueBytes = keyArray[i].getBytes();
+            keyArray[i] =  String.format("key%d", i).getBytes();
+
+            if (i % 100000 == 0) {
+                temp_time2 = print_time(String.format("MALLOC[%16d]", i), temp_time2);
+            }
+        }
+        temp_time = print_time("MALLOC TIME", temp_time);
+
+        temp_time2 = get_time_us();
+
+        for (int i = 0; i < totalCnt.intValue(); i++) {
+            // byte[] keyValueBytes = keyArray[i].getBytes();
+            byte[] keyValueBytes = keyArray[i];
             rocksDB.put(new WriteOptions(), keyValueBytes, keyValueBytes);
+
+            if (i % 100000 == 0) {
+                temp_time2 = print_time(String.format("WRITE[%16d]", i), temp_time2);
+            }
         }
+        temp_time = print_time("WRITE TIME", temp_time);
         rocksDB.flush(new FlushOptions());
-        long writeEndTime = System.nanoTime();
+
+        temp_time2 = get_time_us();
 
         for (int i = 0; i < totalCnt.intValue(); i++) {
-            byte[] keyValueBytes = keyArray[i].getBytes();
+            // byte[] keyValueBytes = keyArray[i].getBytes();
+            byte[] keyValueBytes = keyArray[i];
             byte[] valueBytes = rocksDB.get(new ReadOptions(), keyValueBytes);
             if (valueBytes == null) {
                 System.out.println("Invalid Key:" + i);
             }
-        }
 
-        long readEndTime = System.nanoTime();
-        System.out.println("Time cost: Write:" + (writeEndTime - writeStartTime) / 1000 + "us, Read:" + (readEndTime - writeEndTime) / 1000 + "us.");
+            if (i % 100000 == 0) {
+                temp_time2 = print_time(String.format("READ[%16d]", i), temp_time2);
+            }
+        }
+        temp_time = print_time("READ TIME", temp_time);
+
         rocksDB.close();
     }
 }
