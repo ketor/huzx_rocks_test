@@ -36,16 +36,16 @@ static long getTimeInMill() {
 }
 
 void print_time(const char* msg, long& temp_time) {
-	long local_temp_time = getTimeInMill();
-	printf("%s time=[%ld]ms\n", msg, local_temp_time - temp_time);
-	temp_time = local_temp_time;
+    long local_temp_time = getTimeInMill();
+    printf("%s time=[%ld]ms\n", msg, local_temp_time - temp_time);
+    temp_time = local_temp_time;
 }
 
 int main(int argc, char* argv[]) {
 
     if(argc < 3) {
-	    printf("Usage: huzx_terarkdb [db_path] [count]\n");
-	    exit(0);
+        printf("Usage: huzx_terarkdb [db_path] [count]\n");
+        exit(0);
     }
 
     std::string kDBPath = argv[1];
@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
     for(long i = 0; i < totalCnt; i++){
        sprintf((char*)(buff+i*100), "key%ld", i);
     }
-    print_time("PREPARE DATA", temp_time);
+    print_time("MALLOC TIME", temp_time);
 
     long temp_time2 = getTimeInMill();
     char temp_str2[64];
@@ -92,13 +92,14 @@ int main(int argc, char* argv[]) {
         s = db->Put(WriteOptions(), temp_ptr, temp_ptr);
         assert(s.ok());
 
-	if(i % SAMPLING_COUNT == 0){
-	    sprintf(temp_str2, "%s%d%s%16ld", "WRITE [", SAMPLING_COUNT, "]", i);
-	    print_time(temp_str2, temp_time2);
-	}
+      if(i % SAMPLING_COUNT == 0){
+          sprintf(temp_str2, "%s%d%s%16ld", "WRITE [", SAMPLING_COUNT, "]", i);
+          print_time(temp_str2, temp_time2);
+      }
     }
+    print_time("WRITE TIME", temp_time);
     db->Flush(TERARKDB_NAMESPACE::FlushOptions());
-    print_time("WRITE TTIME", temp_time);
+    print_time("FLUSH TIME", temp_time);
 
     SetPerfLevel(TERARKDB_NAMESPACE::PerfLevel::kEnableTime);
     TERARKDB_NAMESPACE::get_perf_context()->EnablePerLevelPerfContext();
@@ -113,10 +114,10 @@ int main(int argc, char* argv[]) {
         s = db->Get(localReadOpts, (char*)(buff+i*100), &value);
         assert(s.ok());
 
-	if(i % SAMPLING_COUNT == 0){
-	    sprintf(temp_str2, "%s%d%s%16ld", "READ [", SAMPLING_COUNT, "]", i);
-	    print_time(temp_str2, temp_time2);
-	}
+    if(i % SAMPLING_COUNT == 0){
+        sprintf(temp_str2, "%s%d%s%16ld", "READ [", SAMPLING_COUNT, "]", i);
+        print_time(temp_str2, temp_time2);
+    }
     }
     print_time("READ TIME", temp_time);
     std::cout << TERARKDB_NAMESPACE::get_perf_context()->ToString() << std::endl;

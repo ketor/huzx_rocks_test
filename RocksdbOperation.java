@@ -89,6 +89,7 @@ public class RocksdbOperation {
         }
         temp_time = print_time("WRITE TIME", temp_time);
         rocksDB.flush(new FlushOptions());
+        temp_time = print_time("FLUSH TIME", temp_time);
 
         temp_time2 = get_time_us();
 

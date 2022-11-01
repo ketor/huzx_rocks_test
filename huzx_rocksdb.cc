@@ -62,6 +62,7 @@ int main(int argc, char* argv[]) {
     /* Options* options = new Options(dbOptions, *cfOpts); */
     Options options;
     options.create_if_missing = true;
+    options.compression = ROCKSDB_NAMESPACE::kNoCompression;
     /* options.OptimizeForSmallDb(); */
     /* options.OptimizeForPointLookup(10240); */
 
@@ -79,22 +80,23 @@ int main(int argc, char* argv[]) {
     for(long i = 0; i < totalCnt; i++){
        sprintf((char*)(buff+i*100), "key%ld", i);
     }
-    print_time("PREPARE DATA", temp_time);
+    print_time("MALLOC TIME", temp_time);
 
     long temp_time2 = getTimeInMill();
     char temp_str2[64];
     for (long i = 0; i < totalCnt; i++) {
-        char * temp_ptr = (char*)(buff+i*100);
-        s = db->Put(WriteOptions(), temp_ptr, temp_ptr);
-        assert(s.ok());
+          char * temp_ptr = (char*)(buff+i*100);
+          s = db->Put(WriteOptions(), temp_ptr, temp_ptr);
+          assert(s.ok());
 
-    if(i % SAMPLING_COUNT == 0){
-        sprintf(temp_str2, "%s%d%s%16ld", "WRITE [", SAMPLING_COUNT, "]", i);
-        print_time(temp_str2, temp_time2);
+      if(i % SAMPLING_COUNT == 0){
+          sprintf(temp_str2, "%s%d%s%16ld", "WRITE [", SAMPLING_COUNT, "]", i);
+          print_time(temp_str2, temp_time2);
+      }
     }
-    }
+    print_time("WRITE TIME", temp_time);
     db->Flush(rocksdb::FlushOptions());
-    print_time("WRITE TTIME", temp_time);
+    print_time("FLUSH TIME", temp_time);
 
     SetPerfLevel(rocksdb::PerfLevel::kEnableTime);
     rocksdb::get_perf_context()->EnablePerLevelPerfContext();
@@ -106,13 +108,13 @@ int main(int argc, char* argv[]) {
     std::string value;
 
     for (long i = 0; i < totalCnt; i++) {
-        s = db->Get(localReadOpts, (char*)(buff+i*100), &value);
-        assert(s.ok());
+      s = db->Get(localReadOpts, (char*)(buff+i*100), &value);
+      assert(s.ok());
 
-    if(i % SAMPLING_COUNT == 0){
-        sprintf(temp_str2, "%s%d%s%16ld", "READ [", SAMPLING_COUNT, "]", i);
-        print_time(temp_str2, temp_time2);
-    }
+      if(i % SAMPLING_COUNT == 0){
+          sprintf(temp_str2, "%s%d%s%16ld", "READ [", SAMPLING_COUNT, "]", i);
+          print_time(temp_str2, temp_time2);
+      }
     }
     print_time("READ TIME", temp_time);
     std::cout << rocksdb::get_perf_context()->ToString() << std::endl;
