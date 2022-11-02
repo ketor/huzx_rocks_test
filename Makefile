@@ -1,6 +1,7 @@
 ROCKSDB_BASE_PATH=/root/mengsz/facebook/rocksdb
 
 ROCKSDB_JAR=${ROCKSDB_BASE_PATH}/java/target/rocksdbjni-7.9.0-linux64.jar
+# ROCKSDB_JAR=/root/mengsz/rocksdbjni-7.7.3.jar
 ROCKSDB_LIBPATH=${ROCKSDB_BASE_PATH}/java/target
 ROCKSDB_CLASSPATH=${ROCKSDB_BASE_PATH}/java/benchmark/target/classes
 

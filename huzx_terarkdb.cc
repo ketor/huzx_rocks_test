@@ -101,10 +101,9 @@ int main(int argc, char* argv[]) {
     db->Flush(TERARKDB_NAMESPACE::FlushOptions());
     print_time("FLUSH TIME", temp_time);
 
-    SetPerfLevel(TERARKDB_NAMESPACE::PerfLevel::kEnableTime);
-    TERARKDB_NAMESPACE::get_perf_context()->EnablePerLevelPerfContext();
-    TERARKDB_NAMESPACE::get_perf_context()->Reset();
-
+    /* SetPerfLevel(TERARKDB_NAMESPACE::PerfLevel::kEnableTime); */
+    /* TERARKDB_NAMESPACE::get_perf_context()->EnablePerLevelPerfContext(); */
+    /* TERARKDB_NAMESPACE::get_perf_context()->Reset(); */
 
     temp_time2 = getTimeInMill();
     ReadOptions localReadOpts;
@@ -120,8 +119,25 @@ int main(int argc, char* argv[]) {
     }
     }
     print_time("READ TIME", temp_time);
-    std::cout << TERARKDB_NAMESPACE::get_perf_context()->ToString() << std::endl;
+    /* std::cout << TERARKDB_NAMESPACE::get_perf_context()->ToString() << std::endl; */
 
+    /* generate random key */
+    for(long i = 0; i < totalCnt; i++){
+       sprintf((char*)(buff+i*100), "key%ld", rand()%totalCnt);
+    }
+    print_time("GEN RAND KEY TIME", temp_time);
+
+    temp_time2 = getTimeInMill();
+    for (long i = 0; i < totalCnt; i++) {
+      s = db->Get(localReadOpts, (char*)(buff+i*100), &value);
+      assert(s.ok());
+
+      if(i % SAMPLING_COUNT == 0){
+          sprintf(temp_str2, "%s%d%s%16ld", "RAND READ [", SAMPLING_COUNT, "]", i);
+          print_time(temp_str2, temp_time2);
+      }
+    }
+    print_time("RAND READ TIME", temp_time);
     delete db;
     return 0;
 }

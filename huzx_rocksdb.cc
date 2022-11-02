@@ -98,10 +98,9 @@ int main(int argc, char* argv[]) {
     db->Flush(rocksdb::FlushOptions());
     print_time("FLUSH TIME", temp_time);
 
-    SetPerfLevel(rocksdb::PerfLevel::kEnableTime);
-    rocksdb::get_perf_context()->EnablePerLevelPerfContext();
-    rocksdb::get_perf_context()->Reset();
-
+    /* SetPerfLevel(rocksdb::PerfLevel::kEnableTime); */
+    /* rocksdb::get_perf_context()->EnablePerLevelPerfContext(); */
+    /* rocksdb::get_perf_context()->Reset(); */
 
     temp_time2 = getTimeInMill();
     ReadOptions localReadOpts;
@@ -117,7 +116,26 @@ int main(int argc, char* argv[]) {
       }
     }
     print_time("READ TIME", temp_time);
-    std::cout << rocksdb::get_perf_context()->ToString() << std::endl;
+    /* std::cout << rocksdb::get_perf_context()->ToString() << std::endl; */
+
+    /* generate random key */
+    for(long i = 0; i < totalCnt; i++){
+       sprintf((char*)(buff+i*100), "key%ld", rand()%totalCnt);
+    }
+    print_time("GEN RAND KEY TIME", temp_time);
+
+    temp_time2 = getTimeInMill();
+    for (long i = 0; i < totalCnt; i++) {
+      s = db->Get(localReadOpts, (char*)(buff+i*100), &value);
+      assert(s.ok());
+
+      if(i % SAMPLING_COUNT == 0){
+          sprintf(temp_str2, "%s%d%s%16ld", "RAND READ [", SAMPLING_COUNT, "]", i);
+          print_time(temp_str2, temp_time2);
+      }
+    }
+    print_time("RAND READ TIME", temp_time);
+    /* std::cout << rocksdb::get_perf_context()->ToString() << std::endl; */
 
     delete db;
     return 0;
