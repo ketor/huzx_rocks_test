@@ -12,7 +12,7 @@ include(gflags)
 include(snappy)
 include(rocksdb)
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++17")
 
 # include PROTO_HEADER
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
