@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.10)
 project(huzx_rocks_test C CXX)
 
+SET(CMAKE_BUILD_TYPE "Debug")
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 set(THIRD_PARTY_PATH ${CMAKE_CURRENT_BINARY_DIR}/third-party)
 
@@ -35,7 +37,15 @@ set(DEPEND_LIBS
 add_executable(huzx_rocksdb huzx_rocksdb.cc)
 add_dependencies(huzx_rocksdb ${DEPEND_LIBS})
 
+add_executable(pessimistic_example pessimistic_example.cc)
+add_dependencies(pessimistic_example ${DEPEND_LIBS})
+
 target_link_libraries(huzx_rocksdb
+                      "-Xlinker \"-(\""
+                      ${DYNAMIC_LIB}
+                      "-Xlinker \"-)\"")
+
+target_link_libraries(pessimistic_example
                       "-Xlinker \"-(\""
                       ${DYNAMIC_LIB}
                       "-Xlinker \"-)\"")
